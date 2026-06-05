@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Notes</string>
+    <string name="take_photo">Take photo</string>
+    <string name="take_another">Take another</string>
+    <string name="user_photo">Use photo</string>
+    <string name="confirm_delete_title">Confirm deletion</string>
+    <string name="confirm_delete_note">Are you sure you want to delete this note?</string>
+    <string name="yes">Yes</string>
+    <string name="not">No</string>
+    <string name="write_your_note">Write your note here…</string>
+    <string name="confirm_delete_item">Are you sure you want to delete this item?</string>
+    <string name="error_save_image">Error saving image</string>
+    <string name="no_notes_message">No notes yet. Add one!</string>
+    <string name="aqui_vc_gerencia">Here you manage your notes in a broader way. New features coming soon</string>
+    <string name="total_de_notas">Total notes: %1$d</string>
+    <string name="btn_remove_all_notes">Delete all notes</string>
+    <string name="settings_title">Settings</string>
+    <string name="back_button">Back</string>
+    <string name="delete_all_notes_title">Delete all notes</string>
+    <string name="delete_all_notes_message">Are you sure you want to delete all notes?</string>
+</resources>
