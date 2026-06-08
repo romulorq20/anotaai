@@ -1,7 +1,5 @@
 # AnotaAI — Notas Multimídia com Clean Architecture + MVI
 
-![copilot-banner](https://github.com/user-attachments/assets/469d2d6e-5f9b-4e19-8d08-cfc93ed09945)
-
 **AnotaAI** é um aplicativo Android de gerenciamento de notas multimídia desenvolvido com as práticas mais modernas do ecossistema Android. O projeto nasceu como um exercício de refatoração sobre uma base de curso e evoluiu para uma demonstração aplicada de **Clean Architecture**, **MVI** e **Jetpack** — servindo tanto como portfólio técnico quanto como material de referência para quem quer entender essas arquiteturas na prática.
 
 ---
