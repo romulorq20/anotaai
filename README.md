@@ -278,7 +278,7 @@ class NoteViewModel @Inject constructor(
 @Composable
 fun NoteScreen(onBack: () -> Unit = {}) {
     val viewModel = hiltViewModel<NoteViewModel>()
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Coleta efeitos de única ocorrência
     LaunchedEffect(Unit) {
