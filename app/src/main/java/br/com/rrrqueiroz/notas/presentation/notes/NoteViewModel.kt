@@ -2,8 +2,13 @@ package br.com.rrrqueiroz.notas.presentation.notes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import br.com.rrrqueiroz.notas.domain.model.*
-import br.com.rrrqueiroz.notas.domain.repository.NoteRepository
+import br.com.rrrqueiroz.notas.domain.model.BaseNote
+import br.com.rrrqueiroz.notas.domain.model.NoteItemAudio
+import br.com.rrrqueiroz.notas.domain.model.NoteItemChecklist
+import br.com.rrrqueiroz.notas.domain.model.NoteItemImage
+import br.com.rrrqueiroz.notas.domain.model.NoteItemText
+import br.com.rrrqueiroz.notas.domain.model.NoteType
+import br.com.rrrqueiroz.notas.domain.usecase.DeleteItemNoteUseCase
 import br.com.rrrqueiroz.notas.domain.usecase.GetNoteUseCase
 import br.com.rrrqueiroz.notas.domain.usecase.SaveNoteUseCase
 import br.com.rrrqueiroz.notas.utils.AudioManager
@@ -21,7 +26,7 @@ import javax.inject.Inject
 class NoteViewModel @Inject constructor(
     private val getNoteUseCase: GetNoteUseCase,
     private val saveNoteUseCase: SaveNoteUseCase,
-    private val repository: NoteRepository,
+    private val removeItemNoteUseCase: DeleteItemNoteUseCase,
     private val audioManager: AudioManager
 ) : ViewModel() {
 
@@ -112,7 +117,7 @@ class NoteViewModel @Inject constructor(
 
     private fun deleteItem(noteItem: BaseNote) {
         viewModelScope.launch {
-            repository.removeItemNote(noteItem)
+            removeItemNoteUseCase.invoke(noteItem)
             loadNote(_uiState.value.note.id)
         }
     }

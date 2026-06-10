@@ -6,6 +6,7 @@ import br.com.rrrqueiroz.notas.domain.model.NoteItemAudio
 import br.com.rrrqueiroz.notas.domain.model.NoteItemImage
 import br.com.rrrqueiroz.notas.domain.model.NoteItemText
 import br.com.rrrqueiroz.notas.domain.repository.NoteRepository
+import br.com.rrrqueiroz.notas.domain.usecase.DeleteItemNoteUseCase
 import br.com.rrrqueiroz.notas.domain.usecase.GetNoteUseCase
 import br.com.rrrqueiroz.notas.domain.usecase.SaveNoteUseCase
 import br.com.rrrqueiroz.notas.utils.AudioManager
@@ -34,14 +35,14 @@ class NoteViewModelTest {
     private lateinit var viewModel: NoteViewModel
     private val getNoteUseCase: GetNoteUseCase = mockk()
     private val saveNoteUseCase: SaveNoteUseCase = mockk(relaxed = true)
-    private val repository: NoteRepository = mockk(relaxed = true)
+    private val removeItemNoteUseCase: DeleteItemNoteUseCase = mockk(relaxed = true)
     private val audioManager: AudioManager = mockk(relaxed = true)
     private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = NoteViewModel(getNoteUseCase, saveNoteUseCase, repository, audioManager)
+        viewModel = NoteViewModel(getNoteUseCase, saveNoteUseCase, removeItemNoteUseCase, audioManager)
     }
 
     @After
@@ -100,7 +101,7 @@ class NoteViewModelTest {
         viewModel.handleIntent(NoteIntent.DeleteItem(itemToDelete))
         testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerify { repository.removeItemNote(itemToDelete) }
+        coVerify { removeItemNoteUseCase.invoke(itemToDelete) }
         coVerify(exactly = 2) { getNoteUseCase(noteId) }
     }
 

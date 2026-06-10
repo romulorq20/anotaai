@@ -1,14 +1,13 @@
 package br.com.rrrqueiroz.notas.domain.usecase
 
 import br.com.rrrqueiroz.notas.domain.model.BaseNote
-import br.com.rrrqueiroz.notas.domain.model.Note
 import br.com.rrrqueiroz.notas.domain.repository.NoteRepository
 import javax.inject.Inject
 
-class DeleteNoteUseCase @Inject constructor(
+class DeleteItemNoteUseCase @Inject constructor(
     private val repository: NoteRepository
 ) {
     suspend operator fun invoke(note: BaseNote) {
-        repository.removeNote(note as Note)
+        repository.removeItemNote(note)
     }
 }
