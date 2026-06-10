@@ -101,7 +101,7 @@ class NoteViewModelTest {
         viewModel.handleIntent(NoteIntent.DeleteItem(itemToDelete))
         testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerify { removeItemNoteUseCase.invoke(itemToDelete) }
+        coVerify { removeItemNoteUseCase(itemToDelete) }
         coVerify(exactly = 2) { getNoteUseCase(noteId) }
     }
 

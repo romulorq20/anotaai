@@ -117,7 +117,7 @@ class NoteViewModel @Inject constructor(
 
     private fun deleteItem(noteItem: BaseNote) {
         viewModelScope.launch {
-            removeItemNoteUseCase.invoke(noteItem)
+            removeItemNoteUseCase(noteItem)
             loadNote(_uiState.value.note.id)
         }
     }
