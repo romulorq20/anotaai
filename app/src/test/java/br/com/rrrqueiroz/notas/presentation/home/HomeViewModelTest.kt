@@ -2,9 +2,9 @@ package br.com.rrrqueiroz.notas.presentation.home
 
 import app.cash.turbine.test
 import br.com.rrrqueiroz.notas.domain.model.Note
-import br.com.rrrqueiroz.notas.domain.repository.NoteRepository
+import br.com.rrrqueiroz.notas.domain.usecase.DeleteNoteUseCase
+import br.com.rrrqueiroz.notas.domain.usecase.GetAllNotesUseCase
 import br.com.rrrqueiroz.notas.utils.AudioManager
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -27,14 +27,15 @@ import java.io.IOException
 class HomeViewModelTest {
 
     private lateinit var viewModel: HomeViewModel
-    private val repository: NoteRepository = mockk(relaxed = true)
+    private val getAllNotesUseCase: GetAllNotesUseCase = mockk()
+    private val deleteNoteUseCase: DeleteNoteUseCase = mockk(relaxed = true)
     private val audioManager: AudioManager = mockk(relaxed = true)
     private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        every { repository.getAllNotes() } returns flowOf(emptyList())
+        every { getAllNotesUseCase() } returns flowOf(emptyList())
     }
 
     @After
@@ -43,11 +44,11 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `when init then should load notes`() = runTest {
-        val notes = listOf(Note(title = "Note 1"), Note(title = "Note 2"))
-        every { repository.getAllNotes() } returns flowOf(notes)
+    fun `quando inicializar deve carregar as notas`() = runTest {
+        val notes = listOf(Note(title = "Nota 1"), Note(title = "Nota 2"))
+        every { getAllNotesUseCase() } returns flowOf(notes)
 
-        viewModel = HomeViewModel(repository, audioManager)
+        viewModel = HomeViewModel(getAllNotesUseCase, deleteNoteUseCase, audioManager)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
@@ -56,23 +57,22 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `when handle DeleteNote intent then should call repository`() = runTest {
-        viewModel = HomeViewModel(repository, audioManager)
-        val note = Note(title = "Note to delete")
+    fun `quando deletar nota deve chamar DeleteNoteUseCase`() = runTest {
+        viewModel = HomeViewModel(getAllNotesUseCase, deleteNoteUseCase, audioManager)
+        val note = Note(title = "Nota para deletar")
 
         viewModel.handleIntent(HomeIntent.DeleteNote(note))
         testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerify { repository.removeNote(note) }
+        coVerify { deleteNoteUseCase(note) }
     }
 
     @Test
-    fun `when handle SetItemToDelete intent then should update uiState`() = runTest {
-        viewModel = HomeViewModel(repository, audioManager)
-        val note = Note(title = "Note to delete")
+    fun `quando definir item para deletar deve atualizar estado`() = runTest {
+        viewModel = HomeViewModel(getAllNotesUseCase, deleteNoteUseCase, audioManager)
+        val note = Note(title = "Nota para deletar")
 
         viewModel.handleIntent(HomeIntent.SetItemToDelete(note))
-
         viewModel.uiState.test {
             assertEquals(note, awaitItem().itemToDelete)
         }
@@ -84,11 +84,10 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `when handle ToggleAudio then should start playing and update state`() = runTest {
-        viewModel = HomeViewModel(repository, audioManager)
-        val note = Note(id = "1", title = "Audio note")
+    fun `quando reproduzir áudio deve iniciar player e atualizar estado`() = runTest {
+        viewModel = HomeViewModel(getAllNotesUseCase, deleteNoteUseCase, audioManager)
 
-        viewModel.handleIntent(HomeIntent.ToggleAudio(note.id, "/path/audio.acc"))
+        viewModel.handleIntent(HomeIntent.ToggleAudio("1", "/path/audio.acc"))
         testDispatcher.scheduler.advanceUntilIdle()
 
         verify { audioManager.startPlaying("/path/audio.acc") }
@@ -98,8 +97,8 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `when handle ToggleAudio on same note then should stop playing`() = runTest {
-        viewModel = HomeViewModel(repository, audioManager)
+    fun `quando reproduzir a mesma nota deve parar o player`() = runTest {
+        viewModel = HomeViewModel(getAllNotesUseCase, deleteNoteUseCase, audioManager)
 
         viewModel.handleIntent(HomeIntent.ToggleAudio("1", "/path/audio.acc"))
         viewModel.handleIntent(HomeIntent.ToggleAudio("1", "/path/audio.acc"))
@@ -112,20 +111,21 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `when audio playback fails then should emit ShowMessage effect`() = runTest {
-        every { audioManager.startPlaying(any()) } throws IOException("Falha")
-        viewModel = HomeViewModel(repository, audioManager)
+    fun `quando falhar ao reproduzir deve emitir efeito ShowMessage`() = runTest {
+        every { audioManager.startPlaying(any()) } throws IOException("Arquivo inválido")
+        viewModel = HomeViewModel(getAllNotesUseCase, deleteNoteUseCase, audioManager)
 
         viewModel.effect.test {
             viewModel.handleIntent(HomeIntent.ToggleAudio("1", "/path/audio.acc"))
             testDispatcher.scheduler.advanceUntilIdle()
+
             assertEquals(HomeEffect.ShowMessage("Erro ao reproduzir áudio"), awaitItem())
         }
     }
 
     @Test
-    fun `when handle StopAudio then should stop playing and clear state`() = runTest {
-        viewModel = HomeViewModel(repository, audioManager)
+    fun `quando parar áudio deve chamar stopPlaying e limpar estado`() = runTest {
+        viewModel = HomeViewModel(getAllNotesUseCase, deleteNoteUseCase, audioManager)
 
         viewModel.handleIntent(HomeIntent.StopAudio)
 

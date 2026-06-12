@@ -3,7 +3,8 @@ package br.com.rrrqueiroz.notas.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.rrrqueiroz.notas.domain.model.Note
-import br.com.rrrqueiroz.notas.domain.repository.NoteRepository
+import br.com.rrrqueiroz.notas.domain.usecase.DeleteNoteUseCase
+import br.com.rrrqueiroz.notas.domain.usecase.GetAllNotesUseCase
 import br.com.rrrqueiroz.notas.utils.AudioManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val noteRepository: NoteRepository,
+    private val getAllNotesUseCase: GetAllNotesUseCase,
+    private val deleteNoteUseCase: DeleteNoteUseCase,
     private val audioManager: AudioManager
 ) : ViewModel() {
 
@@ -43,7 +45,7 @@ class HomeViewModel @Inject constructor(
 
     private fun loadNotes() {
         viewModelScope.launch {
-            noteRepository.getAllNotes().collect { notes ->
+            getAllNotesUseCase().collect { notes ->
                 _uiState.update { it.copy(notes = notes) }
             }
         }
@@ -51,7 +53,7 @@ class HomeViewModel @Inject constructor(
 
     private fun deleteNote(note: Note) {
         viewModelScope.launch {
-            noteRepository.removeNote(note)
+            deleteNoteUseCase(note)
         }
     }
 

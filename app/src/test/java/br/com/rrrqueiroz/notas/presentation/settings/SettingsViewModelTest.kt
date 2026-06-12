@@ -1,7 +1,8 @@
 package br.com.rrrqueiroz.notas.presentation.settings
 
 import app.cash.turbine.test
-import br.com.rrrqueiroz.notas.domain.repository.NoteRepository
+import br.com.rrrqueiroz.notas.domain.usecase.CountNotesUseCase
+import br.com.rrrqueiroz.notas.domain.usecase.DeleteAllNotesUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -20,14 +21,15 @@ import org.junit.Test
 class SettingsViewModelTest {
 
     private lateinit var viewModel: SettingsViewModel
-    private val repository: NoteRepository = mockk(relaxed = true)
+    private val countNotesUseCase: CountNotesUseCase = mockk()
+    private val deleteAllNotesUseCase: DeleteAllNotesUseCase = mockk(relaxed = true)
     private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        coEvery { repository.countNotes() } returns 5
-        viewModel = SettingsViewModel(repository)
+        coEvery { countNotesUseCase() } returns 5
+        viewModel = SettingsViewModel(countNotesUseCase, deleteAllNotesUseCase)
     }
 
     @After
@@ -36,7 +38,7 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `when init then should load notes count`() = runTest {
+    fun `quando inicializar deve carregar a contagem de notas`() = runTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
@@ -45,8 +47,8 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `when handle LoadNotesCount intent then should update notes count`() = runTest {
-        coEvery { repository.countNotes() } returns 10
+    fun `quando carregar contagem deve chamar CountNotesUseCase`() = runTest {
+        coEvery { countNotesUseCase() } returns 10
 
         viewModel.handleIntent(SettingsIntent.LoadNotesCount)
         testDispatcher.scheduler.advanceUntilIdle()
@@ -57,9 +59,8 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `when handle ShowDeleteDialog intent then should update showConfirmDeleteDialog`() = runTest {
+    fun `quando exibir dialogo deve atualizar showConfirmDeleteDialog`() = runTest {
         viewModel.handleIntent(SettingsIntent.ShowDeleteDialog(true))
-
         viewModel.uiState.test {
             assertEquals(true, awaitItem().showConfirmDeleteDialog)
         }
@@ -71,12 +72,12 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `when handle DeleteAllNotes then should call repository, reset count and emit ShowMessage`() = runTest {
+    fun `quando apagar todas deve chamar DeleteAllNotesUseCase, zerar contador e emitir ShowMessage`() = runTest {
         viewModel.effect.test {
             viewModel.handleIntent(SettingsIntent.DeleteAllNotes)
             testDispatcher.scheduler.advanceUntilIdle()
 
-            coVerify { repository.deleteAllNotes() }
+            coVerify { deleteAllNotesUseCase() }
 
             viewModel.uiState.test {
                 val state = awaitItem()

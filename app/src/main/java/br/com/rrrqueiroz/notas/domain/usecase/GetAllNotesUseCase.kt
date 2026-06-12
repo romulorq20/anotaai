@@ -2,12 +2,11 @@ package br.com.rrrqueiroz.notas.domain.usecase
 
 import br.com.rrrqueiroz.notas.domain.model.Note
 import br.com.rrrqueiroz.notas.domain.repository.NoteRepository
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class DeleteNoteUseCase @Inject constructor(
+class GetAllNotesUseCase @Inject constructor(
     private val repository: NoteRepository
 ) {
-    suspend operator fun invoke(note: Note) {
-        repository.removeNote(note)
-    }
+    operator fun invoke(): Flow<List<Note>> = repository.getAllNotes()
 }

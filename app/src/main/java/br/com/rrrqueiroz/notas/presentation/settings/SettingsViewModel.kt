@@ -2,7 +2,8 @@ package br.com.rrrqueiroz.notas.presentation.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import br.com.rrrqueiroz.notas.domain.repository.NoteRepository
+import br.com.rrrqueiroz.notas.domain.usecase.CountNotesUseCase
+import br.com.rrrqueiroz.notas.domain.usecase.DeleteAllNotesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val noteRepository: NoteRepository
+    private val countNotesUseCase: CountNotesUseCase,
+    private val deleteAllNotesUseCase: DeleteAllNotesUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -37,7 +39,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun countNotes() {
         viewModelScope.launch {
-            val count = noteRepository.countNotes()
+            val count = countNotesUseCase()
             _uiState.update { it.copy(notesCount = count) }
         }
     }
@@ -48,7 +50,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun deleteAllNotes() {
         viewModelScope.launch {
-            noteRepository.deleteAllNotes()
+            deleteAllNotesUseCase()
             _uiState.update { it.copy(notesCount = 0, showConfirmDeleteDialog = false) }
             _effect.emit(SettingsEffect.ShowMessage("Todas as notas foram apagadas"))
         }
